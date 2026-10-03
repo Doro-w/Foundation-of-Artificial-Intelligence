@@ -1,0 +1,305 @@
+---
+title: "Assignment 02 - Checkfile"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r ex01}
+#' Required variables: penguins2 (data.frame)
+#' Required plots: 
+penguins2 <- penguins %>%
+  select(species,
+         sex,
+         flipper_length_mm,
+         body_mass_g)
+
+penguins2
+```
+
+```{r ex02}
+#' Required variables: penguins3 (data.frame)
+#' Required plots: 
+penguins3 <- penguins %>%
+  filter(species == "Gentoo",
+         sex == "female",
+         body_mass_g > 5000)
+
+dim(penguins3)
+nrow(penguins3)
+```
+
+```{r ex03}
+#' Required variables: penguins3 (data.frame)
+#' Required plots: 
+penguins3 <- penguins3 %>%
+  mutate(bill_ratio = bill_length_mm / bill_depth_mm)
+
+head(penguins3, 2)
+```
+
+
+```{r ex04}
+#' Required variables: 
+#' Required plots: 
+#' code block 1
+penguins %>%
+  arrange(desc(body_mass_g)) %>%
+  select(species, body_mass_g) %>%
+  head(10)
+
+#' code block 2
+penguins %>%
+  arrange(desc(body_mass_g)) %>%
+  select(species, body_mass_g) %>%
+  slice_head(n = 10)
+
+#' code block 3
+penguins %>% 
+  slice_max(body_mass_g, n = 10) %>%
+  select(species, body_mass_g)
+
+#' the result of code block 1 and 2 is same, but code block would be different, because there might be different species but have the same body_mass.
+#' as for the code block 1 and 2, they literally take the first 10 rows, after sorting.
+#' as for the code block 3, when there is a tie at the cutoff, adding 'with_ties = FALSE', it will return exactly 10 observations. By default, slice_max() uses with_ties = TRUE.
+```
+
+```{r ex05}
+#' Required variables: penguins4 (data.frame)
+#' Required plots: 
+penguins4 <- penguins %>%
+  group_by(island, species) %>%
+  summarise(
+    n = n(),
+    mean_body_mass = mean(body_mass_g, na.rm = TRUE),
+    sd_body_mass = sd(body_mass_g, na.rm = TRUE),
+    mean_flipper_length = mean(flipper_length_mm, na.rm = TRUE)
+  )
+
+penguins4
+```
+
+
+```{r ex06}
+#' Required variables: penguins5 (data.frame)
+#' Required plots: 
+penguins5 <- penguins %>%
+  filter(sex == "female",
+         !is.na(body_mass_g)) %>%
+  group_by(species) %>%
+  summarise(
+    n = n(),
+    mean_body_mass = mean(body_mass_g),
+    mean_bill_length = mean(bill_length_mm, na.rm = TRUE),
+    mean_bill_depth = mean(bill_depth_mm, na.rm = TRUE),
+    mean_flipper_length = mean(flipper_length_mm, na.rm = TRUE)
+  )
+
+penguins5
+```
+
+```{r ex07a}
+#' Required variables: bayes_positive (function)
+#' Required plots: 
+bayes_positive <- function(prevalence,
+                           sensitivity,
+                           specificity){
+  
+  # Enter the body of the function here and
+  # don't forget to return() your result.
+  posterior <- (prevalence * sensitivity) /
+    (prevalence * sensitivity +
+       (1 - prevalence) * (1 - specificity))
+
+  return(posterior)
+}
+```
+
+```{r ex07b}
+#' Required variables: 
+#' Required plots: 
+bayes_positive(
+  prevalence = 0.2,
+  sensitivity = 0.98,
+  specificity = 0.95
+)
+```
+
+```{r ex07c}
+#' Required variables: 
+#' Required plots: 
+X$posterior <- mapply(
+  bayes_positive,
+  prevalence = X$prev,
+  sensitivity = X$sens,
+  specificity = X$spec
+)
+
+X
+```
+
+```{r ex08a}
+#' Required variables: 
+#' Required plots: 
+sum(population$positive == 1)
+sum(population$disease == 1)
+sum(population$positive == 1 &
+      population$disease == 1)
+
+population %>%
+  summarise(
+    posterior =
+      sum(disease == 1 & positive == 1) /
+      sum(positive == 1)
+  )
+```
+
+```{r ex08b}
+#' Required variables: 
+#' Required plots: 
+prevalence  <- .10
+sensitivity <- .90
+specificity <- .95
+
+population2 <- data.frame(
+  person = 1:10000,
+  disease = rbinom(
+    10000,
+    size = 1,
+    prob = prevalence
+    )
+  ) %>%
+  mutate(
+    positive = ifelse(
+      disease == 1, 
+      yes = rbinom(n(), 1, sensitivity),
+      no  = rbinom(n(), 1, 1 - specificity)
+    )
+  )
+
+population %>%
+  summarise(
+    posterior =
+      sum(disease == 1 & positive == 1) /
+      sum(positive == 1)
+  )
+```
+
+```{r ex09a}
+#' Required variables: 
+#' Required plots: TRUE
+set.seed(MY_STUDENT_ID)
+
+Nsim <- 10000
+
+means_10 <- replicate(
+  Nsim,
+  mean(sample(penguins_clean$body_mass_g, 10))
+)
+
+means_100 <- replicate(
+  Nsim,
+  mean(sample(penguins_clean$body_mass_g, 100))
+)
+
+hist(
+  means_10,
+  main = "Sampling distribution of mean, N = 10",
+  xlab = "Sample mean"
+)
+
+hist(
+  means_100,
+  main = "Sampling distribution of mean, N = 100",
+  xlab = "Sample mean"
+)
+
+sd(means_10)
+sd(means_100)
+```
+
+
+```{r ex09b}
+#' Required variables: 
+#' Required plots: TRUE
+variances <- replicate(
+  Nsim,
+  var(sample(penguins_clean$body_mass_g, 10))
+)
+
+q90 <- replicate(
+  Nsim,
+  quantile(
+    sample(penguins_clean$body_mass_g, 10),
+    probs = 0.90
+  )
+)
+
+hist(
+  variances,
+  main = "Sampling distribution of variance",
+  xlab = "Sample variance"
+)
+
+hist(
+  q90,
+  main = "Sampling distribution of 90% quantile",
+  xlab = "90% quantile"
+)
+```
+
+
+```{r ex10}
+#' Required variables: 
+#' Required plots: TRUE
+Nsim <- 10000
+
+means_25 <- replicate(
+  Nsim,
+  mean(sample(penguins_clean$body_mass_g, 25))
+)
+
+means_50 <- replicate(
+  Nsim,
+  mean(sample(penguins_clean$body_mass_g, 50))
+)
+
+means_500 <- replicate(
+  Nsim,
+  mean(sample(penguins_clean$body_mass_g, 500, replace = TRUE))
+)
+
+hist(
+  means_25,
+  main = "Sampling distribution, n = 25",
+  xlab = "Sample mean"
+)
+
+hist(
+  means_50,
+  main = "Sampling distribution, n = 50",
+  xlab = "Sample mean"
+)
+
+hist(
+  means_500,
+  main = "Sampling distribution, n = 500",
+  xlab = "Sample mean"
+)
+```
+
+
+```{r ex11}
+#' Required variables: 
+#' Required plots: TRUE
+
+```
+
+
+```{r ex12}
+#' Required variables: 
+#' Required plots: TRUE
+
+
+```
