@@ -454,21 +454,26 @@ Generate and visualise the sampling distribution of the means using `nobs=25`, `
 #' Required plots: TRUE
 
 # Simulate the population
+mypop <- runif(100000)
+hist(
+  mypop,
+  main = "mypop")
+
 Nsim <- 10000
 
 means_25 <- replicate(
   Nsim,
-  mean(sample(penguins_clean$body_mass_g, 25))
+  mean(sample(mypop, 25))
 )
 
 means_50 <- replicate(
   Nsim,
-  mean(sample(penguins_clean$body_mass_g, 50))
+  mean(sample(mypop, 50))
 )
 
 means_500 <- replicate(
   Nsim,
-  mean(sample(penguins_clean$body_mass_g, 500, replace = TRUE))
+  mean(sample(mypop, 500))
 )
 
 hist(
@@ -494,17 +499,54 @@ hist(
 ### Exercise 11
 :::{#prompt .message style="color: blue;"}
 Now repeat the experiment according to the instructions in the assignment specs. 
+repeat the experiment from Exercise 10 using the new Exponential population, with sample sizes nobs of 5, 25, 100 and 500 observations. Visualise the sampling distribution of the means in each case. Notice how the shape and the spread change as the sample size is increased?
 :::
 
 ```{r ex11}
 #' Required variables: 
 #' Required plots: TRUE
+#' 
+#' Population 本身是 skewed 的，但 sample mean 的 sampling distribution 随着 n 增加越来越接近 normal。
 
 # Simulate the population
-mypop2 <- rexp(100000, rate = 1)
+mypop2 <- rexp(100000, rate = 1) # Feel free to experiment later with the `rate` parameter
+hist(
+  mypop2,
+  main = "mypop2")
 
 # Enter your solution below
+means_25_exp <- replicate(
+  Nsim,
+  mean(sample(mypop2, 25))
+)
 
+means_50_exp <- replicate(
+  Nsim,
+  mean(sample(mypop2, 50))
+)
+
+means_500_exp <- replicate(
+  Nsim,
+  mean(sample(mypop2, 500))
+)
+
+hist(
+  means_25_exp,
+  main = "Exponential population: n = 25",
+  xlab = "Sample mean"
+)
+
+hist(
+  means_50_exp,
+  main = "Exponential population: n = 50",
+  xlab = "Sample mean"
+)
+
+hist(
+  means_500_exp,
+  main = "Exponential population: n = 500",
+  xlab = "Sample mean"
+)
 ```
 
 
@@ -516,6 +558,19 @@ Visualise both the data distribution and the sampling distribution of the means 
 ```{r ex12}
 #' Required variables: 
 #' Required plots: TRUE
+penguins_flipper <- penguins %>%
+  filter(!is.na(flipper_length_mm))
 
+Nsim <- 10000
 
+sample_means <- replicate(
+  Nsim,
+  mean(sample(penguins_flipper$flipper_length_mm, 15))
+)
+  
+hist(
+  sample_means,
+  main = "Sampling distribution of mean, n = 15",
+  xlab = "Sample mean of flipper length"
+)
 ```
